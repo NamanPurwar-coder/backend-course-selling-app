@@ -9,7 +9,7 @@ app.use(express.json());
 
 const secret = process.env.JWT_SECRET;
 const port = process.env.PORT;
-const mongo_url= process.env.MONGO_URL;
+const mongo_url = process.env.MONGO_URL;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -75,54 +75,136 @@ const User = mongoose.model("User", userSchema);
 const Admin = mongoose.model("Admin", adminSchema);
 const Course = mongoose.model("Course", courseSchema);
 
-
-
 const authMiddleware = (req, res, next) => {
-  //  authMiddleware logic here
+  const token = req.headers.token;
+  try {
+    const id = jwt.verify(token, secret);
+  } catch (e) {
+    return res.status(403).json({ msg: "unauthorized" });
+  }
+  req.id = id;
+  next();
 };
 
 mongoose.connect(mongo_url);
 
-// Admin routes
-app.post("/admin/signup", (req, res) => {
-  // logic to sign up admin
+app.post("/admin/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = await Admin.create({
+    email: email,
+    name: name,
+    password: password,
+  });
+
+  res.json({
+    user: user,
+    msg: "account created successfully",
+  });
 });
 
-app.post("/admin/login", (req, res) => {
-  // logic to log in admin
+app.post("/admin/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const id = (await Admin.findOne({ email: email, password: password })).id;
+    const token = jwt.sign(id, secret);
+    res.json({
+      msg: "you are logged in ",
+      token: token,
+    });
+  } catch (e) {
+    res.json({
+      msg: "email or password is wrong ",
+      error: e,
+    });
+  }
 });
 
-app.post("/admin/courses", (req, res) => {
-  // logic to create a course
+app.post("/admin/courses", async (req, res) => {
+  const id = req.id;
+  const user = await Admin.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
-app.put("/admin/courses/:courseId", (req, res) => {
-  // logic to edit a course
+app.put("/admin/courses/:courseId", async (req, res) => {
+  const id = req.id;
+  const user = await Admin.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
-app.get("/admin/courses", (req, res) => {
-  // logic to get all courses
+app.get("/admin/courses", async (req, res) => {
+  const id = req.id;
+  const user = await Admin.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
-// User routes
-app.post("/users/signup", (req, res) => {
-  // logic to sign up user
+app.post("/users/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = await User.create({
+    email: email,
+    name: name,
+    password: password,
+  });
+
+  res.json({
+    user: user,
+    msg: "account created successfully",
+  });
 });
 
-app.post("/users/login", (req, res) => {
+app.post("/users/login", async (req, res) => {
   // logic to log in user
+  const { email, password } = req.body;
+
+  try {
+    const id = (await User.findOne({ email: email, password: password })).id;
+    const token = jwt.sign(id, secret);
+    res.json({
+      msg: "you are logged in ",
+      token: token,
+    });
+  } catch (e) {
+    res.json({
+      msg: "email or password is wrong ",
+      error: e,
+    });
+  }
 });
 
-app.get("/users/courses", (req, res) => {
-  // logic to list all courses
+app.get("/users/courses", async (req, res) => {
+  const id = req.id;
+  const user = await User.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
-app.post("/users/courses/:courseId", (req, res) => {
-  // logic to purchase a course
+app.post("/users/courses/:courseId", async (req, res) => {
+  const id = req.id;
+  const user = await User.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
-app.get("/users/purchasedCourses", (req, res) => {
-  // logic to view purchased courses
+app.get("/users/purchasedCourses", authMiddleware, async (req, res) => {
+  const id = req.id;
+  const user = await User.findOne({ _id: id });
+  res.json({
+    user: user,
+    msg: "now you are logged in ",
+  });
 });
 
 app.listen(port, () => {
