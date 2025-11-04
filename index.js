@@ -7,8 +7,9 @@ const app = express();
 
 app.use(express.json());
 
-const secret = process.env.JWT_SECRERT;
+const secret = process.env.JWT_SECRET;
 const port = process.env.PORT;
+const mongo_url= process.env.MONGO_URL;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -74,12 +75,13 @@ const User = mongoose.model("User", userSchema);
 const Admin = mongoose.model("Admin", adminSchema);
 const Course = mongoose.model("Course", courseSchema);
 
+
+
 const authMiddleware = (req, res, next) => {
   //  authMiddleware logic here
 };
 
-// Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/course-selling-app");
+mongoose.connect(mongo_url);
 
 // Admin routes
 app.post("/admin/signup", (req, res) => {
@@ -124,5 +126,5 @@ app.get("/users/purchasedCourses", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("Server is listening on port 3000");
+  console.log(`Server is listening on port ${port} `);
 });
