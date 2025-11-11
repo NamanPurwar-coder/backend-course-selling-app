@@ -1,11 +1,14 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+import express from "express";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
 dotenv.config();
+import userRouter from "./routes/admin.js";
 const app = express();
 
 app.use(express.json());
+app.use("/naman",userRouter);
 
 const secret = process.env.JWT_SECRET;
 const port = process.env.PORT;
