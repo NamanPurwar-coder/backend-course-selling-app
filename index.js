@@ -4,11 +4,15 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
-import userRouter from "./routes/admin.js";
+import adminRouter from "./routes/admin.js";
+import userRouter from "./routes/user.js";
+import courseRouter from "./routes/course.js";
 const app = express();
 
 app.use(express.json());
-app.use("/naman",userRouter);
+app.use("/user", userRouter);
+app.use("/admin", adminRouter);
+app.use("/course", courseRouter);
 
 const secret = process.env.JWT_SECRET;
 const port = process.env.PORT;
@@ -90,125 +94,6 @@ const authMiddleware = (req, res, next) => {
 };
 
 mongoose.connect(mongo_url);
-
-app.post("/admin/signup", async (req, res) => {
-  const { name, email, password } = req.body;
-  const user = await Admin.create({
-    email: email,
-    name: name,
-    password: password,
-  });
-
-  res.json({
-    user: user,
-    msg: "account created successfully",
-  });
-});
-
-app.post("/admin/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const id = (await Admin.findOne({ email: email, password: password })).id;
-    const token = jwt.sign(id, secret);
-    res.json({
-      msg: "you are logged in ",
-      token: token,
-    });
-  } catch (e) {
-    res.json({
-      msg: "email or password is wrong ",
-      error: e,
-    });
-  }
-});
-
-app.post("/admin/courses", async (req, res) => {
-  const id = req.id;
-  const user = await Admin.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
-
-app.put("/admin/courses/:courseId", async (req, res) => {
-  const id = req.id;
-  const user = await Admin.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
-
-app.get("/admin/courses", async (req, res) => {
-  const id = req.id;
-  const user = await Admin.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
-
-app.post("/users/signup", async (req, res) => {
-  const { name, email, password } = req.body;
-  const user = await User.create({
-    email: email,
-    name: name,
-    password: password,
-  });
-
-  res.json({
-    user: user,
-    msg: "account created successfully",
-  });
-});
-
-app.post("/users/login", async (req, res) => {
-  // logic to log in user
-  const { email, password } = req.body;
-
-  try {
-    const id = (await User.findOne({ email: email, password: password })).id;
-    const token = jwt.sign(id, secret);
-    res.json({
-      msg: "you are logged in ",
-      token: token,
-    });
-  } catch (e) {
-    res.json({
-      msg: "email or password is wrong ",
-      error: e,
-    });
-  }
-});
-
-app.get("/users/courses", async (req, res) => {
-  const id = req.id;
-  const user = await User.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
-
-app.post("/users/courses/:courseId", async (req, res) => {
-  const id = req.id;
-  const user = await User.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
-
-app.get("/users/purchasedCourses", authMiddleware, async (req, res) => {
-  const id = req.id;
-  const user = await User.findOne({ _id: id });
-  res.json({
-    user: user,
-    msg: "now you are logged in ",
-  });
-});
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port} `);
